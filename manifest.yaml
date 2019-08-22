@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: my-products
+              servicePort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-products
+spec:
+  type: NodePort
+  selector:
+    app: products
+  ports:
+    - protocol: TCP
+      port: 5001
+      targetPort: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-deployment
+spec:
+  selector:
+    matchLabels:
+      app: products
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: products
+    spec:
+      containers:
+        - name: hello
+          image: mizchi/hello-node:v3
+          ports:
+            - containerPort: 5001
